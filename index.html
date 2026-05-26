@@ -1,0 +1,1594 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dein Name — Motorrad & Leben</title>
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600&family=Space+Mono:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+
+<!-- GSAP -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+<style>
+/* ─── RESET & BASE ──────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --teal: #00d1d1;
+  --teal-dim: rgba(0,209,209,.15);
+  --teal-glow: rgba(0,209,209,.4);
+  --black: #060608;
+  --dark: #0c0c0f;
+  --dark2: #111115;
+  --dark3: #181820;
+  --white: #f0f2f5;
+  --muted: #6b6b80;
+  --border: rgba(0,209,209,.18);
+  --font-head: 'Orbitron', sans-serif;
+  --font-body: 'Rajdhani', sans-serif;
+  --font-mono: 'Space Mono', monospace;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--black);
+  color: var(--white);
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.7;
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* ─── CUSTOM CURSOR ─────────────────────────────────── */
+.cursor-dot, .cursor-ring {
+  position: fixed; pointer-events: none; z-index: 9999;
+  transform: translate(-50%, -50%);
+}
+.cursor-dot {
+  width: 6px; height: 6px;
+  background: var(--teal);
+  border-radius: 50%;
+  transition: transform .1s;
+}
+.cursor-ring {
+  width: 34px; height: 34px;
+  border: 1.5px solid var(--teal-glow);
+  border-radius: 50%;
+  transition: transform .15s cubic-bezier(.25,.46,.45,.94), width .2s, height .2s, border-color .2s;
+}
+body:has(a:hover) .cursor-ring,
+body:has(button:hover) .cursor-ring {
+  width: 50px; height: 50px;
+  border-color: var(--teal);
+}
+
+/* ─── GRAIN OVERLAY ─────────────────────────────────── */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 9990; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
+  opacity: .4;
+}
+
+/* ─── NAV ───────────────────────────────────────────── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 22px 48px;
+  transition: background .4s, backdrop-filter .4s, padding .4s;
+}
+nav.scrolled {
+  background: rgba(6,6,8,.88);
+  backdrop-filter: blur(16px);
+  padding: 14px 48px;
+  border-bottom: 1px solid var(--border);
+}
+.nav-logo {
+  font-family: var(--font-head);
+  font-size: .85rem; letter-spacing: .35em;
+  color: var(--teal);
+  text-decoration: none;
+  text-transform: uppercase;
+  position: relative;
+}
+.nav-logo::after {
+  content: '';
+  position: absolute; bottom: -3px; left: 0;
+  width: 100%; height: 1px;
+  background: var(--teal);
+  transform: scaleX(0); transform-origin: left;
+  transition: transform .3s;
+}
+.nav-logo:hover::after { transform: scaleX(1); }
+
+.nav-links {
+  display: flex; gap: 36px; list-style: none;
+}
+.nav-links a {
+  font-family: var(--font-body);
+  font-size: .8rem; letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color .25s;
+  position: relative;
+}
+.nav-links a::after {
+  content: '';
+  position: absolute; bottom: -4px; left: 0;
+  width: 0; height: 1px;
+  background: var(--teal);
+  transition: width .3s;
+}
+.nav-links a:hover { color: var(--white); }
+.nav-links a:hover::after { width: 100%; }
+.nav-links a.active { color: var(--teal); }
+.nav-links a.active::after { width: 100%; }
+
+.nav-hamburger {
+  display: none; flex-direction: column; gap: 5px;
+  cursor: pointer; padding: 4px;
+}
+.nav-hamburger span {
+  display: block; width: 24px; height: 1.5px;
+  background: var(--white);
+  transition: all .3s;
+}
+
+/* ─── PAGES ─────────────────────────────────────────── */
+.page {
+  display: none; min-height: 100vh;
+}
+.page.active { display: block; }
+
+/* ─── HOME ──────────────────────────────────────────── */
+#page-home { background: var(--black); }
+
+.hero {
+  position: relative; height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+
+/* Portrait image containers */
+.hero-img {
+  position: absolute; inset: 0;
+  background-size: cover; background-position: center;
+}
+.hero-img-1 {
+  background-image: url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1600&q=80');
+  opacity: 1;
+  transition: opacity .8s ease;
+}
+.hero-img-2 {
+  background-image: url('https://images.unsplash.com/photo-1568772585407-9f217672aefd?w=1600&q=80');
+  opacity: 0;
+  transition: opacity .8s ease;
+}
+.hero-img::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(6,6,8,.88) 0%,
+    rgba(6,6,8,.4) 40%,
+    rgba(6,6,8,.4) 60%,
+    rgba(6,6,8,.88) 100%
+  );
+}
+
+.hero-content {
+  position: relative; z-index: 2;
+  width: 100%; max-width: 1400px;
+  padding: 0 60px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 60px; align-items: center;
+}
+
+.hero-left, .hero-right {
+  opacity: 0; transform: translateY(20px);
+  transition: opacity .8s ease, transform .8s ease;
+}
+.hero-left.visible, .hero-right.visible {
+  opacity: 1; transform: translateY(0);
+}
+.hero-left { text-align: right; }
+.hero-right { text-align: left; }
+
+.hero-tag {
+  font-family: var(--font-mono);
+  font-size: .7rem; letter-spacing: .25em;
+  color: var(--teal); text-transform: uppercase;
+  margin-bottom: 16px;
+  display: block;
+}
+.hero-left p, .hero-right p {
+  font-size: 1.05rem; color: rgba(240,242,245,.75);
+  max-width: 320px; line-height: 1.8;
+}
+.hero-left p { margin-left: auto; }
+
+.hero-motto {
+  font-family: var(--font-head);
+  font-size: 1.1rem; color: var(--white);
+  margin-bottom: 12px;
+  letter-spacing: .06em;
+}
+
+.hero-values {
+  display: flex; flex-direction: column; gap: 8px;
+  margin-top: 20px;
+}
+.hero-value {
+  display: flex; align-items: center; gap: 10px;
+  font-size: .82rem; letter-spacing: .12em;
+  color: var(--muted); text-transform: uppercase;
+}
+.hero-value::before {
+  content: '—'; color: var(--teal); font-family: var(--font-mono);
+}
+
+.hero-center {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 12px;
+}
+.hero-name {
+  font-family: var(--font-head);
+  font-size: clamp(1.6rem, 3vw, 2.6rem);
+  letter-spacing: .3em; text-transform: uppercase;
+  color: var(--white);
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+}
+.hero-name span { color: var(--teal); }
+.hero-divider {
+  width: 1px; height: 80px;
+  background: linear-gradient(to bottom, transparent, var(--teal), transparent);
+}
+
+.hero-scroll {
+  position: absolute; bottom: 36px; left: 50%; transform: translateX(-50%);
+  z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 8px;
+  opacity: .6;
+}
+.hero-scroll span {
+  font-family: var(--font-mono); font-size: .62rem;
+  letter-spacing: .3em; text-transform: uppercase; color: var(--teal);
+}
+.scroll-line {
+  width: 1px; height: 50px;
+  background: linear-gradient(to bottom, var(--teal), transparent);
+  animation: scrollPulse 2s ease-in-out infinite;
+}
+@keyframes scrollPulse {
+  0%,100% { opacity: .4; transform: scaleY(1); }
+  50% { opacity: 1; transform: scaleY(1.2); }
+}
+
+/* Morph section */
+.hero-morph {
+  height: 100vh; position: relative; overflow: hidden;
+}
+.morph-img {
+  position: absolute; inset: 0;
+  background-size: cover; background-position: center;
+}
+.morph-img-a {
+  background-image: url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1600&q=80');
+}
+.morph-img-b {
+  background-image: url('https://images.unsplash.com/photo-1568772585407-9f217672aefd?w=1600&q=80');
+  opacity: 0;
+}
+.morph-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to bottom, var(--black), transparent 20%, transparent 80%, var(--black));
+  z-index: 1;
+}
+.morph-text {
+  position: absolute; inset: 0; z-index: 2;
+  display: flex; align-items: center; justify-content: center;
+}
+.morph-quote {
+  font-family: var(--font-head);
+  font-size: clamp(1.2rem, 3.5vw, 2.8rem);
+  letter-spacing: .15em; text-align: center;
+  color: rgba(240,242,245,.9);
+  text-shadow: 0 0 60px rgba(0,209,209,.3);
+  max-width: 800px; padding: 0 40px;
+}
+.morph-quote em { color: var(--teal); font-style: normal; }
+
+/* About preview on home */
+.home-preview {
+  padding: 140px 60px;
+  max-width: 1200px; margin: 0 auto;
+}
+.section-label {
+  font-family: var(--font-mono); font-size: .68rem;
+  letter-spacing: .35em; text-transform: uppercase;
+  color: var(--teal); margin-bottom: 20px; display: block;
+}
+.section-title {
+  font-family: var(--font-head);
+  font-size: clamp(1.8rem, 4vw, 3.6rem);
+  letter-spacing: .08em; line-height: 1.1;
+  color: var(--white);
+}
+.section-title .accent { color: var(--teal); }
+
+/* ─── SHARED SECTION STYLES ─────────────────────────── */
+.page-section {
+  padding: 120px 60px;
+  max-width: 1300px; margin: 0 auto;
+}
+.page-header {
+  padding: 160px 60px 80px;
+  border-bottom: 1px solid var(--border);
+}
+.page-header-inner { max-width: 1300px; margin: 0 auto; }
+
+/* ─── ABOUT PAGE ─────────────────────────────────────── */
+#page-about { background: var(--black); }
+
+.about-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px; align-items: start;
+}
+.about-text p {
+  color: rgba(240,242,245,.7);
+  margin-bottom: 24px; font-size: 1.05rem;
+}
+.about-text p strong { color: var(--teal); font-weight: 600; }
+
+.about-stats {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 2px; margin-top: 48px;
+}
+.stat-item {
+  background: var(--dark2);
+  padding: 28px; border: 1px solid var(--border);
+  transition: border-color .3s, background .3s;
+}
+.stat-item:hover { border-color: var(--teal); background: var(--dark3); }
+.stat-num {
+  font-family: var(--font-head);
+  font-size: 2.2rem; color: var(--teal);
+  letter-spacing: .05em;
+}
+.stat-label {
+  font-size: .75rem; letter-spacing: .2em;
+  color: var(--muted); text-transform: uppercase;
+  margin-top: 4px;
+}
+
+.about-images {
+  display: grid; grid-template-columns: 1fr 1fr;
+  grid-template-rows: 280px 180px; gap: 6px;
+}
+.about-img {
+  background-size: cover; background-position: center;
+  overflow: hidden; position: relative;
+}
+.about-img:first-child {
+  grid-column: 1 / -1; height: 340px;
+  background-image: url('https://images.unsplash.com/photo-1449426468159-d96dbf08f19f?w=900&q=80');
+}
+.about-img:nth-child(2) {
+  background-image: url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80');
+}
+.about-img:nth-child(3) {
+  background-image: url('https://images.unsplash.com/photo-1568772585407-9f217672aefd?w=600&q=80');
+}
+.about-img::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(6,6,8,.6), transparent);
+  transition: opacity .3s;
+}
+.about-img:hover::after { opacity: .3; }
+
+.hobbies-list {
+  display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px;
+}
+.hobby-tag {
+  padding: 8px 18px;
+  border: 1px solid var(--border);
+  font-size: .78rem; letter-spacing: .18em;
+  text-transform: uppercase; color: var(--muted);
+  transition: all .25s;
+  font-family: var(--font-mono);
+}
+.hobby-tag:hover {
+  border-color: var(--teal); color: var(--teal);
+  background: var(--teal-dim);
+}
+
+/* ─── TRACKS PAGE ────────────────────────────────────── */
+#page-tracks { background: var(--black); }
+
+.tracks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 2px;
+}
+.track-card {
+  position: relative; overflow: hidden;
+  background: var(--dark2);
+  border: 1px solid var(--border);
+  transition: border-color .35s, transform .35s;
+  cursor: pointer;
+}
+.track-card:hover {
+  border-color: var(--teal);
+  transform: translateY(-4px);
+}
+.track-img {
+  height: 240px; background-size: cover; background-position: center;
+  position: relative; overflow: hidden;
+}
+.track-img::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(6,6,8,.9) 0%, transparent 60%);
+}
+.track-img img { width: 100%; height: 100%; object-fit: cover; }
+.track-overlay-tag {
+  position: absolute; top: 16px; left: 16px; z-index: 1;
+  background: var(--teal); color: var(--black);
+  font-family: var(--font-mono); font-size: .65rem;
+  letter-spacing: .2em; text-transform: uppercase;
+  padding: 4px 10px;
+}
+.track-body { padding: 28px; }
+.track-name {
+  font-family: var(--font-head); font-size: 1rem;
+  letter-spacing: .1em; color: var(--white);
+  margin-bottom: 8px;
+}
+.track-desc {
+  font-size: .9rem; color: var(--muted);
+  line-height: 1.6; margin-bottom: 20px;
+}
+.track-meta {
+  display: flex; gap: 20px; flex-wrap: wrap;
+}
+.track-meta-item {
+  display: flex; align-items: center; gap: 6px;
+  font-family: var(--font-mono); font-size: .7rem;
+  color: var(--teal); letter-spacing: .1em;
+}
+.track-meta-item svg { width: 14px; height: 14px; }
+
+.track-map-placeholder {
+  height: 140px;
+  background: var(--dark3);
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono); font-size: .7rem;
+  color: var(--muted); letter-spacing: .15em;
+  position: relative; overflow: hidden;
+}
+.track-map-placeholder::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: 
+    linear-gradient(rgba(0,209,209,.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,209,209,.04) 1px, transparent 1px);
+  background-size: 30px 30px;
+}
+.map-route {
+  position: absolute;
+  stroke: var(--teal); stroke-width: 2;
+  fill: none; opacity: .7;
+}
+
+/* ─── GALLERY PAGE ───────────────────────────────────── */
+#page-gallery { background: var(--black); }
+
+.gallery-filter {
+  display: flex; gap: 12px; margin-bottom: 40px; flex-wrap: wrap;
+}
+.filter-btn {
+  padding: 8px 20px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-family: var(--font-mono); font-size: .7rem;
+  letter-spacing: .2em; text-transform: uppercase;
+  cursor: pointer;
+  transition: all .25s;
+}
+.filter-btn:hover, .filter-btn.active {
+  border-color: var(--teal); color: var(--teal);
+  background: var(--teal-dim);
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: 260px;
+  gap: 4px;
+}
+.gallery-item {
+  position: relative; overflow: hidden; cursor: pointer;
+  background: var(--dark2);
+}
+.gallery-item:nth-child(4n+1) { grid-row: span 2; }
+.gallery-item:nth-child(7n+3) { grid-column: span 2; }
+.gallery-item img {
+  width: 100%; height: 100%; object-fit: cover;
+  transition: transform .6s cubic-bezier(.25,.46,.45,.94), filter .4s;
+  filter: brightness(.85) saturate(.9);
+}
+.gallery-item:hover img {
+  transform: scale(1.06);
+  filter: brightness(1) saturate(1.2);
+}
+.gallery-item-overlay {
+  position: absolute; inset: 0;
+  background: rgba(0,209,209,.08);
+  opacity: 0; transition: opacity .3s;
+  display: flex; align-items: center; justify-content: center;
+}
+.gallery-item:hover .gallery-item-overlay { opacity: 1; }
+.gallery-overlay-icon {
+  width: 44px; height: 44px;
+  border: 1.5px solid var(--teal);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--teal);
+}
+
+/* Lightbox */
+.lightbox {
+  position: fixed; inset: 0; z-index: 5000;
+  background: rgba(6,6,8,.97);
+  display: none; align-items: center; justify-content: center;
+  backdrop-filter: blur(10px);
+}
+.lightbox.open { display: flex; animation: fadeIn .3s ease; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.lightbox-img {
+  max-width: 90vw; max-height: 85vh;
+  object-fit: contain;
+  border: 1px solid var(--border);
+}
+.lightbox-close {
+  position: absolute; top: 30px; right: 36px;
+  font-family: var(--font-mono); font-size: .8rem;
+  color: var(--muted); cursor: pointer;
+  letter-spacing: .2em; transition: color .25s;
+}
+.lightbox-close:hover { color: var(--teal); }
+.lightbox-nav {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  background: transparent; border: 1px solid var(--border);
+  color: var(--white); padding: 14px 18px;
+  cursor: pointer; font-size: 1.2rem;
+  transition: all .25s;
+}
+.lightbox-nav:hover { border-color: var(--teal); color: var(--teal); }
+.lightbox-prev { left: 30px; }
+.lightbox-next { right: 30px; }
+.lightbox-counter {
+  position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%);
+  font-family: var(--font-mono); font-size: .7rem;
+  color: var(--muted); letter-spacing: .2em;
+}
+
+/* ─── PROJECTS PAGE ──────────────────────────────────── */
+#page-projects { background: var(--black); }
+
+.projects-list { display: flex; flex-direction: column; gap: 2px; }
+.project-item {
+  display: grid; grid-template-columns: 340px 1fr;
+  border: 1px solid var(--border);
+  overflow: hidden; background: var(--dark2);
+  transition: border-color .35s;
+}
+.project-item:hover { border-color: var(--teal); }
+.project-img {
+  height: 280px; background-size: cover; background-position: center;
+  position: relative;
+}
+.project-img::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(to right, transparent, rgba(6,6,8,.8));
+}
+.project-body {
+  padding: 40px 48px;
+  display: flex; flex-direction: column; justify-content: center;
+}
+.project-number {
+  font-family: var(--font-head);
+  font-size: 4rem; color: rgba(0,209,209,.08);
+  letter-spacing: .05em; line-height: 1;
+  margin-bottom: -16px;
+}
+.project-title {
+  font-family: var(--font-head);
+  font-size: 1.2rem; letter-spacing: .1em;
+  color: var(--white); margin-bottom: 12px;
+}
+.project-desc {
+  color: var(--muted); font-size: .95rem; line-height: 1.7;
+  margin-bottom: 24px; max-width: 480px;
+}
+.project-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+.project-tag {
+  padding: 4px 12px;
+  border: 1px solid rgba(0,209,209,.25);
+  font-family: var(--font-mono); font-size: .65rem;
+  color: var(--teal); letter-spacing: .15em; text-transform: uppercase;
+}
+.project-status {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--font-mono); font-size: .65rem;
+  letter-spacing: .2em; text-transform: uppercase;
+  color: var(--teal); margin-bottom: 20px;
+}
+.project-status::before {
+  content: ''; width: 6px; height: 6px;
+  border-radius: 50%; background: var(--teal);
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
+
+/* ─── BLOG PAGE ──────────────────────────────────────── */
+#page-blog { background: var(--black); }
+
+.blog-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr);
+  gap: 2px;
+}
+.blog-card {
+  background: var(--dark2); border: 1px solid var(--border);
+  padding: 40px; transition: border-color .3s, background .3s;
+  cursor: pointer; position: relative; overflow: hidden;
+}
+.blog-card::before {
+  content: ''; position: absolute;
+  top: 0; left: 0; right: 0; height: 2px;
+  background: var(--teal);
+  transform: scaleX(0); transform-origin: left;
+  transition: transform .35s;
+}
+.blog-card:hover { border-color: var(--teal); background: var(--dark3); }
+.blog-card:hover::before { transform: scaleX(1); }
+.blog-card:first-child {
+  grid-column: 1 / -1;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 40px;
+}
+.blog-date {
+  font-family: var(--font-mono); font-size: .68rem;
+  letter-spacing: .25em; color: var(--teal);
+  text-transform: uppercase; margin-bottom: 16px;
+}
+.blog-title {
+  font-family: var(--font-head); font-size: 1.1rem;
+  letter-spacing: .06em; color: var(--white);
+  line-height: 1.4; margin-bottom: 16px;
+}
+.blog-excerpt {
+  color: var(--muted); font-size: .9rem; line-height: 1.7;
+}
+.blog-read-time {
+  margin-top: 20px;
+  font-family: var(--font-mono); font-size: .65rem;
+  color: rgba(107,107,128,.6); letter-spacing: .2em;
+}
+.blog-featured-img {
+  background-size: cover; background-position: center;
+  background-image: url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=700&q=80');
+  min-height: 260px; position: relative;
+}
+.blog-featured-img::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(to left, transparent, rgba(6,6,8,.5));
+}
+
+/* ─── IMPRESSUM / DATENSCHUTZ ────────────────────────── */
+#page-impressum, #page-datenschutz { background: var(--black); }
+
+.legal-content {
+  max-width: 720px;
+}
+.legal-content h2 {
+  font-family: var(--font-head); font-size: .9rem;
+  letter-spacing: .15em; color: var(--teal);
+  text-transform: uppercase; margin: 36px 0 12px;
+}
+.legal-content h2:first-of-type { margin-top: 0; }
+.legal-content p, .legal-content address {
+  color: rgba(240,242,245,.55);
+  font-style: normal; font-size: .9rem;
+  line-height: 1.8; margin-bottom: 10px;
+}
+.legal-divider {
+  height: 1px; background: var(--border);
+  margin: 28px 0;
+}
+
+/* ─── FOOTER ─────────────────────────────────────────── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 40px 60px;
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--dark);
+}
+.footer-copy {
+  font-family: var(--font-mono); font-size: .65rem;
+  color: var(--muted); letter-spacing: .2em;
+}
+.footer-links { display: flex; gap: 28px; }
+.footer-links a {
+  font-family: var(--font-mono); font-size: .65rem;
+  letter-spacing: .2em; text-transform: uppercase;
+  color: var(--muted); text-decoration: none;
+  transition: color .25s;
+}
+.footer-links a:hover { color: var(--teal); }
+
+/* ─── REVEAL ANIMATIONS ─────────────────────────────── */
+.reveal {
+  opacity: 0; transform: translateY(30px);
+  transition: opacity .8s ease, transform .8s ease;
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+.reveal-left {
+  opacity: 0; transform: translateX(-30px);
+  transition: opacity .8s ease, transform .8s ease;
+}
+.reveal-left.visible { opacity: 1; transform: translateX(0); }
+.reveal-right {
+  opacity: 0; transform: translateX(30px);
+  transition: opacity .8s ease, transform .8s ease;
+}
+.reveal-right.visible { opacity: 1; transform: translateX(0); }
+
+/* Stagger delays */
+.delay-1 { transition-delay: .1s !important; }
+.delay-2 { transition-delay: .2s !important; }
+.delay-3 { transition-delay: .3s !important; }
+.delay-4 { transition-delay: .4s !important; }
+.delay-5 { transition-delay: .5s !important; }
+
+/* ─── TEAL LINE DECORATIONS ─────────────────────────── */
+.teal-line {
+  display: inline-flex; align-items: center; gap: 14px;
+  margin-bottom: 12px;
+}
+.teal-line::before {
+  content: ''; width: 40px; height: 1px;
+  background: var(--teal);
+}
+
+/* ─── MOBILE NAV DRAWER ──────────────────────────────── */
+.nav-drawer {
+  position: fixed; inset: 0; z-index: 999;
+  background: rgba(6,6,8,.97);
+  backdrop-filter: blur(20px);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 32px;
+  transform: translateX(100%);
+  transition: transform .4s cubic-bezier(.77,0,.175,1);
+}
+.nav-drawer.open { transform: translateX(0); }
+.nav-drawer a {
+  font-family: var(--font-head);
+  font-size: 1.4rem; letter-spacing: .2em;
+  text-transform: uppercase; color: var(--muted);
+  text-decoration: none; transition: color .25s;
+}
+.nav-drawer a:hover { color: var(--teal); }
+
+/* ─── RESPONSIVE ─────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .hero-content {
+    grid-template-columns: 1fr;
+    padding: 0 30px;
+    text-align: center;
+  }
+  .hero-left, .hero-right { text-align: center; }
+  .hero-left p { margin: 0 auto; }
+  .hero-name { writing-mode: horizontal-tb; transform: none; font-size: 1.6rem; }
+  .hero-divider { width: 80px; height: 1px; }
+  .hero-center { flex-direction: row; }
+  .hero-values { align-items: center; }
+  .about-grid { grid-template-columns: 1fr; }
+  .project-item { grid-template-columns: 1fr; }
+  .project-img { height: 220px; }
+  .blog-card:first-child { grid-column: 1; display: block; }
+  .blog-featured-img { height: 200px; margin-bottom: 24px; }
+  .blog-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 768px) {
+  nav { padding: 18px 24px; }
+  nav.scrolled { padding: 12px 24px; }
+  .nav-links { display: none; }
+  .nav-hamburger { display: flex; }
+  .page-section, .home-preview { padding: 80px 24px; }
+  .page-header { padding: 120px 24px 60px; }
+  footer { flex-direction: column; gap: 20px; text-align: center; }
+  footer { padding: 32px 24px; }
+  .gallery-grid { grid-template-columns: repeat(2, 1fr); }
+  .gallery-item:nth-child(4n+1) { grid-row: span 1; }
+  .gallery-item:nth-child(7n+3) { grid-column: span 1; }
+  .tracks-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- Custom Cursor -->
+<div class="cursor-dot" id="cursorDot"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- Nav -->
+<nav id="mainNav">
+  <a href="#" class="nav-logo" onclick="showPage('home')">DK</a>
+  <ul class="nav-links">
+    <li><a href="#" onclick="showPage('home')" data-page="home" class="active">Start</a></li>
+    <li><a href="#" onclick="showPage('about')" data-page="about">Über mich</a></li>
+    <li><a href="#" onclick="showPage('tracks')" data-page="tracks">Tracks</a></li>
+    <li><a href="#" onclick="showPage('gallery')" data-page="gallery">Galerie</a></li>
+    <li><a href="#" onclick="showPage('projects')" data-page="projects">Projekte</a></li>
+    <li><a href="#" onclick="showPage('blog')" data-page="blog">Journal</a></li>
+  </ul>
+  <div class="nav-hamburger" id="hamburger" onclick="toggleDrawer()">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- Mobile Drawer -->
+<div class="nav-drawer" id="navDrawer">
+  <a href="#" onclick="showPage('home');toggleDrawer()">Start</a>
+  <a href="#" onclick="showPage('about');toggleDrawer()">Über mich</a>
+  <a href="#" onclick="showPage('tracks');toggleDrawer()">Tracks</a>
+  <a href="#" onclick="showPage('gallery');toggleDrawer()">Galerie</a>
+  <a href="#" onclick="showPage('projects');toggleDrawer()">Projekte</a>
+  <a href="#" onclick="showPage('blog');toggleDrawer()">Journal</a>
+</div>
+
+<!-- ════════════════ HOME PAGE ════════════════ -->
+<div class="page active" id="page-home">
+
+  <!-- Hero -->
+  <section class="hero" id="heroSection">
+    <div class="hero-img hero-img-1" id="heroImg1"></div>
+    <div class="hero-img hero-img-2" id="heroImg2"></div>
+
+    <div class="hero-content">
+      <div class="hero-left" id="heroLeft">
+        <span class="hero-tag">// Wer ich bin</span>
+        <p>Motorradfahrer aus Leidenschaft. Fernstraßen-Junkie. Ich suche keine Abkürzungen — ich suche den Weg, der sich lohnt.</p>
+      </div>
+
+      <div class="hero-center">
+        <div class="hero-divider"></div>
+        <div class="hero-name">Dein <span>Name</span></div>
+        <div class="hero-divider"></div>
+      </div>
+
+      <div class="hero-right" id="heroRight">
+        <span class="hero-tag">// Wofür ich stehe</span>
+        <div class="hero-motto">Freiheit. Präzision. Stille.</div>
+        <div class="hero-values">
+          <div class="hero-value">Motorrad &amp; Technik</div>
+          <div class="hero-value">Bergstraßen &amp; Pässe</div>
+          <div class="hero-value">Fotografie &amp; Momente</div>
+          <div class="hero-value">Minimalismus &amp; Design</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-scroll">
+      <span>Scroll</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- Morph Section -->
+  <section class="hero-morph" id="morphSection">
+    <div class="morph-img morph-img-a" id="morphA"></div>
+    <div class="morph-img morph-img-b" id="morphB"></div>
+    <div class="morph-overlay"></div>
+    <div class="morph-text">
+      <div class="morph-quote reveal" id="morphQuote">
+        "Nicht die Ankunft zählt —<br><em>der Weg ist das Erlebnis.</em>"
+      </div>
+    </div>
+  </section>
+
+  <!-- Quick Nav -->
+  <section class="home-preview">
+    <span class="section-label reveal">// Explore</span>
+    <div class="section-title reveal">Was dich<br>erwartet <span class="accent">.</span></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:2px;margin-top:60px;">
+      <div class="stat-item reveal delay-1" onclick="showPage('tracks')" style="cursor:pointer;">
+        <div class="stat-num">12+</div>
+        <div class="stat-label">Gefahrene Touren</div>
+      </div>
+      <div class="stat-item reveal delay-2" onclick="showPage('gallery')" style="cursor:pointer;">
+        <div class="stat-num">180+</div>
+        <div class="stat-label">Fotos &amp; Momente</div>
+      </div>
+      <div class="stat-item reveal delay-3" onclick="showPage('projects')" style="cursor:pointer;">
+        <div class="stat-num">4</div>
+        <div class="stat-label">Aktive Projekte</div>
+      </div>
+      <div class="stat-item reveal delay-4" onclick="showPage('blog')" style="cursor:pointer;">
+        <div class="stat-num">∞</div>
+        <div class="stat-label">Geschichten</div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-copy">&copy; 2025 Dein Name — Alle Rechte vorbehalten</div>
+    <div class="footer-links">
+      <a href="#" onclick="showPage('impressum')">Impressum</a>
+      <a href="#" onclick="showPage('datenschutz')">Datenschutz</a>
+    </div>
+  </footer>
+</div>
+
+<!-- ════════════════ ABOUT PAGE ════════════════ -->
+<div class="page" id="page-about">
+  <div class="page-header">
+    <div class="page-header-inner">
+      <span class="section-label reveal">// Über mich</span>
+      <h1 class="section-title reveal">Der Mensch<br>hinter dem <span class="accent">Helm</span></h1>
+    </div>
+  </div>
+
+  <div class="page-section">
+    <div class="about-grid">
+      <div class="about-text">
+        <p class="reveal"><strong>Mein Name ist [Dein Name].</strong> Ich lebe für das Fahren — nicht als Sport, sondern als Geisteszustand. Wenn die Landschaft an mir vorbeizieht und der Motor rhythmisch läuft, bin ich genau dort, wo ich sein will.</p>
+        <p class="reveal delay-1">Ich bin in [Stadt] aufgewachsen, heute lebe ich in [Ort]. Tagsüber [Beruf/Tätigkeit], abends und am Wochenende auf dem Asphalt. Mein Motorrad ist kein Hobby — es ist ein Teil meiner Sprache.</p>
+        <p class="reveal delay-2">Was mich antreibt: die Stille vor einem Alpenpass. Der Moment, in dem du weißt, du bist der einzige auf dieser Straße. Die perfekte Kurve, die sich von alleine legt.</p>
+
+        <div class="hobbies-list reveal delay-3">
+          <span class="hobby-tag">Motorrad</span>
+          <span class="hobby-tag">Alpentouren</span>
+          <span class="hobby-tag">Fotografie</span>
+          <span class="hobby-tag">Technik</span>
+          <span class="hobby-tag">Mechanik</span>
+          <span class="hobby-tag">Landschaft</span>
+          <span class="hobby-tag">Minimalismus</span>
+          <span class="hobby-tag">Kaffee</span>
+        </div>
+
+        <div class="about-stats reveal delay-4">
+          <div class="stat-item">
+            <div class="stat-num">8+</div>
+            <div class="stat-label">Jahre Fahrerfahrung</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-num">45k</div>
+            <div class="stat-label">Gefahrene Kilometer</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-num">6</div>
+            <div class="stat-label">Länder bereist</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-num">3</div>
+            <div class="stat-label">Motorräder besessen</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="about-images reveal-right">
+        <div class="about-img"></div>
+        <div class="about-img"></div>
+        <div class="about-img"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-copy">&copy; 2025 Dein Name</div>
+    <div class="footer-links">
+      <a href="#" onclick="showPage('impressum')">Impressum</a>
+      <a href="#" onclick="showPage('datenschutz')">Datenschutz</a>
+    </div>
+  </footer>
+</div>
+
+<!-- ════════════════ TRACKS PAGE ════════════════ -->
+<div class="page" id="page-tracks">
+  <div class="page-header">
+    <div class="page-header-inner">
+      <span class="section-label reveal">// Motorrad-Touren</span>
+      <h1 class="section-title reveal">Gefahrene <span class="accent">Tracks</span></h1>
+    </div>
+  </div>
+
+  <div class="page-section">
+    <div class="tracks-grid">
+
+      <!-- Track 1 -->
+      <div class="track-card reveal">
+        <div class="track-img" style="background-image:url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=700&q=80')">
+          <span class="track-overlay-tag">Alpen</span>
+        </div>
+        <div class="track-body">
+          <div class="track-name">Großglockner Hochalpenstraße</div>
+          <div class="track-desc">Österreichs bekannteste Panoramastraße — ein Erlebnis, das sich jedes Jahr lohnt. Haarnadelkurven, Gletscher, absolute Stille.</div>
+          <div class="track-meta">
+            <div class="track-meta-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M12 3v18"/></svg>
+              48 km
+            </div>
+            <div class="track-meta-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+              2,5 Std.
+            </div>
+            <div class="track-meta-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>
+              Österreich
+            </div>
+          </div>
+        </div>
+        <div class="track-map-placeholder">
+          <svg class="map-route" viewBox="0 0 400 140" style="width:100%;height:100%;">
+            <path d="M20,110 C60,90 100,120 140,80 C180,40 220,70 260,50 C300,30 340,60 380,30" stroke-dasharray="5,4"/>
+          </svg>
+          <span style="position:relative;z-index:1;">Route // GPS-Daten</span>
+        </div>
+      </div>
+
+      <!-- Track 2 -->
+      <div class="track-card reveal delay-1">
+        <div class="track-img" style="background-image:url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=700&q=80')">
+          <span class="track-overlay-tag">Schweiz</span>
+        </div>
+        <div class="track-body">
+          <div class="track-name">Susten / Grimsel / Furka</div>
+          <div class="track-desc">Die drei Pässe in einem Tag — schweizer Ingenieurkunst trifft auf alpine Dramatik. Legendär und nie langweilig.</div>
+          <div class="track-meta">
+            <div class="track-meta-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M12 3v18"/></svg>
+              210 km
+            </div>
+            <div class="track-meta-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+              5,5 Std.
+            </div>
+            <div class="track-meta-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>
+              Schweiz
+            </div>
+          </div>
+        </div>
+        <div class="track-map-placeholder">
+          <svg class="map-route" viewBox="0 0 400 140" style="width:100%;height:100%;">
+            <path d="M20,120 C70,100 110,40 150,60 C190,80 220,30 270,50 C310,65 350,90 385,40" stroke-dasharray="5,4"/>
+          </svg>
+          <span style="position:relative;z-index:1;">Route // GPS-Daten</span>
+        </div>
+      </div>
+
+      <!-- Track 3 -->
+      <div class="track-card reveal delay-2">
+        <div class="track-img" style="background-image:url('https://images.unsplash.com/photo-1495841674384-e16f77d87e8a?w=700&q=80')">
+          <span class="track-overlay-tag">Black Forest</span>
+        </div>
+        <div class="track-body">
+          <div class="track-name">Schwarzwald — Tälerroute</div>
+          <div class="track-desc">Enge Waldwege, kaum Verkehr, endlose Kurven. Der Schwarzwald für Fahrer, nicht für Touristen.</div>
+          <div class="track-meta">
+            <div class="track-meta-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M12 3v18"/></svg>
+              145 km
+            </div>
+            <div class="track-meta-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+              4 Std.
+            </div>
+            <div class="track-meta-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>
+              Deutschland
+            </div>
+          </div>
+        </div>
+        <div class="track-map-placeholder">
+          <svg class="map-route" viewBox="0 0 400 140" style="width:100%;height:100%;">
+            <path d="M20,70 C60,50 90,100 130,90 C170,80 200,40 240,60 C280,80 320,50 380,70" stroke-dasharray="5,4"/>
+          </svg>
+          <span style="position:relative;z-index:1;">Route // GPS-Daten</span>
+        </div>
+      </div>
+
+      <!-- Track 4 -->
+      <div class="track-card reveal delay-3">
+        <div class="track-img" style="background-image:url('https://images.unsplash.com/photo-1527004013197-933c4bb611b3?w=700&q=80')">
+          <span class="track-overlay-tag">Dolomiten</span>
+        </div>
+        <div class="track-body">
+          <div class="track-name">Sella Ronda — Dolomiten</div>
+          <div class="track-desc">Vier Pässe, ein Kreis, unendliche Schönheit. Die Sella Ronda ist Motorradfahren auf einem anderen Niveau.</div>
+          <div class="track-meta">
+            <div class="track-meta-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M12 3v18"/></svg>
+              55 km
+            </div>
+            <div class="track-meta-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+              3 Std.
+            </div>
+            <div class="track-meta-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>
+              Italien
+            </div>
+          </div>
+        </div>
+        <div class="track-map-placeholder">
+          <svg class="map-route" viewBox="0 0 400 140" style="width:100%;height:100%;">
+            <path d="M200,120 C250,80 300,60 350,90 C380,110 380,40 320,30 C260,20 200,50 150,30 C100,10 60,50 50,90 C40,130 120,140 200,120" stroke-dasharray="5,4"/>
+          </svg>
+          <span style="position:relative;z-index:1;">Rundtour // GPS-Daten</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-copy">&copy; 2025 Dein Name</div>
+    <div class="footer-links">
+      <a href="#" onclick="showPage('impressum')">Impressum</a>
+      <a href="#" onclick="showPage('datenschutz')">Datenschutz</a>
+    </div>
+  </footer>
+</div>
+
+<!-- ════════════════ GALLERY PAGE ════════════════ -->
+<div class="page" id="page-gallery">
+  <div class="page-header">
+    <div class="page-header-inner">
+      <span class="section-label reveal">// Visuelle Momente</span>
+      <h1 class="section-title reveal">Galerie <span class="accent">.</span></h1>
+    </div>
+  </div>
+
+  <div class="page-section">
+    <div class="gallery-filter reveal">
+      <button class="filter-btn active" data-filter="all">Alle</button>
+      <button class="filter-btn" data-filter="roads">Straßen</button>
+      <button class="filter-btn" data-filter="landscape">Landschaft</button>
+      <button class="filter-btn" data-filter="details">Details</button>
+      <button class="filter-btn" data-filter="moments">Momente</button>
+    </div>
+
+    <div class="gallery-grid" id="galleryGrid">
+      <div class="gallery-item" data-src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&q=90" data-cat="moments">
+        <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80" alt="Motorrad Moment">
+        <div class="gallery-item-overlay"><div class="gallery-overlay-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></div></div>
+      </div>
+      <div class="gallery-item" data-src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&q=90" data-cat="landscape">
+        <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80" alt="Berglandschaft">
+        <div class="gallery-item-overlay"><div class="gallery-overlay-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></div></div>
+      </div>
+      <div class="gallery-item" data-src="https://images.unsplash.com/photo-1568772585407-9f217672aefd?w=1200&q=90" data-cat="roads">
+        <img src="https://images.unsplash.com/photo-1568772585407-9f217672aefd?w=600&q=80" alt="Straßenperspektive">
+        <div class="gallery-item-overlay"><div class="gallery-overlay-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></div></div>
+      </div>
+      <div class="gallery-item" data-src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1200&q=90" data-cat="landscape">
+        <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&q=80" alt="Alpenpass">
+        <div class="gallery-item-overlay"><div class="gallery-overlay-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></div></div>
+      </div>
+      <div class="gallery-item" data-src="https://images.unsplash.com/photo-1449426468159-d96dbf08f19f?w=1200&q=90" data-cat="roads">
+        <img src="https://images.unsplash.com/photo-1449426468159-d96dbf08f19f?w=600&q=80" alt="Bergstraße">
+        <div class="gallery-item-overlay"><div class="gallery-overlay-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></div></div>
+      </div>
+      <div class="gallery-item" data-src="https://images.unsplash.com/photo-1495841674384-e16f77d87e8a?w=1200&q=90" data-cat="landscape">
+        <img src="https://images.unsplash.com/photo-1495841674384-e16f77d87e8a?w=600&q=80" alt="Waldweg">
+        <div class="gallery-item-overlay"><div class="gallery-overlay-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></div></div>
+      </div>
+      <div class="gallery-item" data-src="https://images.unsplash.com/photo-1527004013197-933c4bb611b3?w=1200&q=90" data-cat="details">
+        <img src="https://images.unsplash.com/photo-1527004013197-933c4bb611b3?w=800&q=80" alt="Dolomiten">
+        <div class="gallery-item-overlay"><div class="gallery-overlay-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></div></div>
+      </div>
+      <div class="gallery-item" data-src="https://images.unsplash.com/photo-1501854140801-50d01698950b?w=1200&q=90" data-cat="moments">
+        <img src="https://images.unsplash.com/photo-1501854140801-50d01698950b?w=600&q=80" alt="Panorama">
+        <div class="gallery-item-overlay"><div class="gallery-overlay-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></div></div>
+      </div>
+      <div class="gallery-item" data-src="https://images.unsplash.com/photo-1443890484047-5eaa67d1d630?w=1200&q=90" data-cat="details">
+        <img src="https://images.unsplash.com/photo-1443890484047-5eaa67d1d630?w=600&q=80" alt="Technik Detail">
+        <div class="gallery-item-overlay"><div class="gallery-overlay-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></div></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-copy">&copy; 2025 Dein Name</div>
+    <div class="footer-links">
+      <a href="#" onclick="showPage('impressum')">Impressum</a>
+      <a href="#" onclick="showPage('datenschutz')">Datenschutz</a>
+    </div>
+  </footer>
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox">
+  <div class="lightbox-close" onclick="closeLightbox()">ESC / Schließen</div>
+  <button class="lightbox-nav lightbox-prev" onclick="lightboxNav(-1)">&#8592;</button>
+  <img class="lightbox-img" id="lightboxImg" src="" alt="">
+  <button class="lightbox-nav lightbox-next" onclick="lightboxNav(1)">&#8594;</button>
+  <div class="lightbox-counter" id="lightboxCounter"></div>
+</div>
+
+<!-- ════════════════ PROJECTS PAGE ════════════════ -->
+<div class="page" id="page-projects">
+  <div class="page-header">
+    <div class="page-header-inner">
+      <span class="section-label reveal">// Builds &amp; Projekte</span>
+      <h1 class="section-title reveal">Was gerade<br><span class="accent">entsteht</span></h1>
+    </div>
+  </div>
+
+  <div class="page-section">
+    <div class="projects-list">
+
+      <div class="project-item reveal">
+        <div class="project-img" style="background-image:url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=700&q=80')"></div>
+        <div class="project-body">
+          <div class="project-number">01</div>
+          <div class="project-status">In Arbeit</div>
+          <div class="project-title">Umbau: Auspuffanlage Custom</div>
+          <div class="project-desc">Entwicklung und Montage einer maßgeschneiderten Auspuffanlage. Fokus auf Sound-Charakteristik und Gewichtsreduktion ohne Leistungsverlust.</div>
+          <div class="project-tags">
+            <span class="project-tag">Mechanik</span>
+            <span class="project-tag">Auspuff</span>
+            <span class="project-tag">Performance</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="project-item reveal delay-1">
+        <div class="project-img" style="background-image:url('https://images.unsplash.com/photo-1443890484047-5eaa67d1d630?w=700&q=80')"></div>
+        <div class="project-body">
+          <div class="project-number">02</div>
+          <div class="project-status">Geplant</div>
+          <div class="project-title">GPS-Track Datenbank</div>
+          <div class="project-desc">Persönliche Sammlung aller gefahrenen Routen mit eigenen Notizen, Wetterdaten und Empfehlungen — offline verfügbar.</div>
+          <div class="project-tags">
+            <span class="project-tag">Software</span>
+            <span class="project-tag">GPS</span>
+            <span class="project-tag">Daten</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="project-item reveal delay-2">
+        <div class="project-img" style="background-image:url('https://images.unsplash.com/photo-1527004013197-933c4bb611b3?w=700&q=80')"></div>
+        <div class="project-body">
+          <div class="project-number">03</div>
+          <div class="project-status">Abgeschlossen</div>
+          <div class="project-title">Beleuchtung: LED-Conversion</div>
+          <div class="project-desc">Kompletttausch auf LED-Technik. Deutlich helleres Licht, geringere Wärmeentwicklung, modernes Erscheinungsbild.</div>
+          <div class="project-tags">
+            <span class="project-tag">Elektrik</span>
+            <span class="project-tag">LED</span>
+            <span class="project-tag">Sicherheit</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-copy">&copy; 2025 Dein Name</div>
+    <div class="footer-links">
+      <a href="#" onclick="showPage('impressum')">Impressum</a>
+      <a href="#" onclick="showPage('datenschutz')">Datenschutz</a>
+    </div>
+  </footer>
+</div>
+
+<!-- ════════════════ BLOG PAGE ════════════════ -->
+<div class="page" id="page-blog">
+  <div class="page-header">
+    <div class="page-header-inner">
+      <span class="section-label reveal">// Gedanken &amp; Erlebnisse</span>
+      <h1 class="section-title reveal">Journal <span class="accent">.</span></h1>
+    </div>
+  </div>
+
+  <div class="page-section">
+    <div class="blog-grid">
+
+      <div class="blog-card reveal">
+        <div class="blog-featured-img"></div>
+        <div>
+          <div class="blog-date">14. Juli 2025</div>
+          <div class="blog-title">Der Furkapass im Morgengrauen — warum 5 Uhr der beste Moment ist</div>
+          <div class="blog-excerpt">Es gibt diesen einen Moment, kurz bevor die Sonne über den Kamm bricht. Der Asphalt noch kalt und trocken. Kein anderes Fahrzeug. Nur der Motor und das Licht...</div>
+          <div class="blog-read-time">// 4 min Lesezeit</div>
+        </div>
+      </div>
+
+      <div class="blog-card reveal delay-1">
+        <div class="blog-date">28. Juni 2025</div>
+        <div class="blog-title">Was ein Motorrad über einen Menschen aussagt</div>
+        <div class="blog-excerpt">Man wählt kein Motorrad rein rational. Man wählt es, weil es etwas in einem widerspiegelt, das man noch nicht in Worte fassen konnte.</div>
+        <div class="blog-read-time">// 3 min Lesezeit</div>
+      </div>
+
+      <div class="blog-card reveal delay-2">
+        <div class="blog-date">10. Mai 2025</div>
+        <div class="blog-title">Dolomiten: Die Route, die mich sprachlos ließ</div>
+        <div class="blog-excerpt">Ich hatte viel gehört. Aber nichts hätte mich auf diesen ersten Anblick vorbereiten können — drei Zinnen, kein Laut.</div>
+        <div class="blog-read-time">// 5 min Lesezeit</div>
+      </div>
+
+      <div class="blog-card reveal delay-3">
+        <div class="blog-date">02. April 2025</div>
+        <div class="blog-title">Saisonstart: Warum das erste Mal immer wie das erste Mal ist</div>
+        <div class="blog-excerpt">Jedes Frühjahr das gleiche Ritual: Tank voll, Reifen kalt, Handschuhe an. Und dann — diese Stille kurz bevor der Motor anspringt.</div>
+        <div class="blog-read-time">// 2 min Lesezeit</div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-copy">&copy; 2025 Dein Name</div>
+    <div class="footer-links">
+      <a href="#" onclick="showPage('impressum')">Impressum</a>
+      <a href="#" onclick="showPage('datenschutz')">Datenschutz</a>
+    </div>
+  </footer>
+</div>
+
+<!-- ════════════════ IMPRESSUM ════════════════ -->
+<div class="page" id="page-impressum">
+  <div class="page-header">
+    <div class="page-header-inner">
+      <span class="section-label">// Rechtliches</span>
+      <h1 class="section-title">Impressum</h1>
+    </div>
+  </div>
+  <div class="page-section">
+    <div class="legal-content">
+      <h2>Angaben gemäß § 5 TMG</h2>
+      <address>
+        Dein Vor- und Nachname<br>
+        Musterstraße 1<br>
+        00000 Musterstadt<br>
+        Deutschland
+      </address>
+
+      <div class="legal-divider"></div>
+
+      <h2>Verantwortlich für den Inhalt</h2>
+      <p>Dein Vor- und Nachname (Adresse wie oben)</p>
+
+      <div class="legal-divider"></div>
+
+      <h2>Haftungsausschluss</h2>
+      <p>Die Inhalte dieser Seite wurden mit größtmöglicher Sorgfalt erstellt. Für die Richtigkeit, Vollständigkeit und Aktualität der Inhalte kann jedoch keine Gewähr übernommen werden.</p>
+      <p>Als Diensteanbieter sind wir gemäß § 7 Abs. 1 TMG für eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich.</p>
+
+      <div class="legal-divider"></div>
+
+      <h2>Urheberrecht</h2>
+      <p>Die durch den Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem deutschen Urheberrecht. Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung außerhalb der Grenzen des Urheberrechtes bedürfen der schriftlichen Zustimmung des jeweiligen Autors.</p>
+    </div>
+  </div>
+  <footer>
+    <div class="footer-copy">&copy; 2025 Dein Name</div>
+    <div class="footer-links">
+      <a href="#" onclick="showPage('home')">Startseite</a>
+      <a href="#" onclick="showPage('datenschutz')">Datenschutz</a>
+    </div>
+  </footer>
+</div>
+
+<!-- ════════════════ DATENSCHUTZ ════════════════ -->
+<div class="page" id="page-datenschutz">
+  <div class="page-header">
+    <div class="page-header-inner">
+      <span class="section-label">// Rechtliches</span>
+      <h1 class="section-title">Datenschutz</h1>
+    </div>
+  </div>
+  <div class="page-section">
+    <div class="legal-content">
+      <h2>1. Datenschutz auf einen Blick</h2>
+      <p>Diese Website ist eine rein private, nicht-kommerzielle Seite. Es werden keine personenbezogenen Daten erhoben, gespeichert oder weitergegeben. Es gibt kein Kontaktformular, keine Newsletter-Funktion und keine Nutzerverfolgung.</p>
+
+      <div class="legal-divider"></div>
+
+      <h2>2. Hosting</h2>
+      <p>Diese Seite wird bei einem Webhoster betrieben. Details zum Hoster sowie seine Datenschutzbestimmungen entnehmen Sie bitte den Informationen des jeweiligen Anbieters.</p>
+
+      <div class="legal-divider"></div>
+
+      <h2>3. Cookies</h2>
+      <p>Diese Website verwendet keine Cookies. Es werden keine Tracking-Mechanismen eingesetzt.</p>
+
+      <div class="legal-divider"></div>
+
+      <h2>4. Server-Log-Dateien</h2>
+      <p>Der Hoster dieser Seite erhebt und speichert automatisch Informationen in sogenannten Server-Log-Dateien, die Ihr Browser automatisch übermittelt. Dies sind: Browsertyp und -version, verwendetes Betriebssystem, Referrer-URL, Hostname des zugreifenden Rechners sowie Uhrzeit der Serveranfrage. Diese Daten sind nicht bestimmten Personen zuordbar und werden nicht mit anderen Datenquellen zusammengeführt.</p>
+
+      <div class="legal-divider"></div>
+
+      <h2>5. Externe Dienste</h2>
+      <p>Für die Darstellung von Karten und Bildern werden externe Dienste eingebunden (z.B. Unsplash für Beispielfotos). Bitte beachten Sie die jeweiligen Datenschutzerklärungen dieser Anbieter.</p>
+
+      <div class="legal-divider"></div>
+
+      <h2>6. Ihre Rechte</h2>
+      <p>Sie haben jederzeit das Recht auf Auskunft über die bezüglich Ihrer Person gespeicherten Daten sowie das Recht auf Berichtigung, Sperrung oder Löschung dieser Daten. Da auf dieser Website keine personenbezogenen Daten erhoben werden, erübrigt sich eine Anfrage in der Regel.</p>
+    </div>
+  </div>
+  <footer>
+    <div class="footer-copy">&copy; 2025 Dein Name</div>
+    <div class="footer-links">
+      <a href="#" onclick="showPage('home')">Startseite</a>
+      <a href="#" onclick="showPage('impressum')">Impressum</a>
+    </div>
+  </footer>
+</div>
+
+<!-- ─── SCRIPTS ──────────────────────────────────── -->
+<script>
+/* ── Cursor ── */
+const dot = document.getElementById('cursorDot');
+const ring = document.getElementById('cursorRing');
+let mx = 0, my = 0, rx = 0, ry = 0;
+document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+(function animCursor() {
+  dot.style.left = mx + 'px'; dot.style.top = my + 'px';
+  rx += (mx - rx) * .14; ry += (my - ry) * .14;
+  ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+  requestAnimationFrame(animCursor);
+})();
+
+/* ── Page Navigation ── */
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const target = document.getElementById('page-' + id);
+  if (target) {
+    target.classList.add('active');
+    window.scrollTo(0, 0);
+    setTimeout(initReveal, 100);
+  }
+  document.querySelectorAll('.nav-links a').forEach(a => {
+    a.classList.toggle('active', a.dataset.page === id);
+  });
+  return false;
+}
+
+/* ── Mobile Drawer ── */
+function toggleDrawer() {
+  document.getElementById('navDrawer').classList.toggle('open');
+}
+
+/* ── Nav scroll style ── */
+window.addEventListener('scroll', () => {
+  document.getElementById('mainNav').classList.toggle('scrolled', window.scrollY > 40);
+});
+
+/* ── Hero animations ── */
+(function heroInit() {
+  const left = document.getElementById('heroLeft');
+  const right = document.getElementById('heroRight');
+  setTimeout(() => { left && left.classList.add('visible'); }, 600);
+  setTimeout(() => { right && right.classList.add('visible'); }, 900);
+})();
+
+/* ── Scroll Morph (Home) ── */
+(function morphInit() {
+  const morphSection = document.getElementById('morphSection');
+  const morphB = document.getElementById('morphB');
+  if (!morphSection || !morphB) return;
+  window.addEventListener('scroll', () => {
+    const rect = morphSection.getBoundingClientRect();
+    const pct = Math.max(0, Math.min(1, -rect.top / (rect.height - window.innerHeight)));
+    morphB.style.opacity = pct;
+  });
+})();
+
+/* ── Reveal on scroll ── */
+function initReveal() {
+  const els = document.querySelectorAll('.page.active .reveal, .page.active .reveal-left, .page.active .reveal-right');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: .12 });
+  els.forEach(el => observer.observe(el));
+}
+initReveal();
+
+/* ── Gallery filter ── */
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    const filter = this.dataset.filter;
+    document.querySelectorAll('.gallery-item').forEach(item => {
+      if (filter === 'all' || item.dataset.cat === filter) {
+        item.style.display = '';
+        item.style.opacity = '0';
+        setTimeout(() => { item.style.transition = 'opacity .4s'; item.style.opacity = '1'; }, 50);
+      } else {
+        item.style.display = 'none';
+      }
+    });
+  });
+});
+
+/* ── Lightbox ── */
+let lightboxItems = [];
+let lightboxCurrent = 0;
+
+document.querySelectorAll('.gallery-item').forEach((item, i) => {
+  item.addEventListener('click', () => {
+    lightboxItems = Array.from(document.querySelectorAll('.gallery-item[style*="display"]:not([style*="none"]), .gallery-item:not([style*="none"])'));
+    lightboxCurrent = lightboxItems.indexOf(item);
+    if (lightboxCurrent < 0) lightboxCurrent = i;
+    openLightbox();
+  });
+});
+
+function openLightbox() {
+  const lb = document.getElementById('lightbox');
+  const img = document.getElementById('lightboxImg');
+  const counter = document.getElementById('lightboxCounter');
+  const items = Array.from(document.querySelectorAll('.gallery-item'));
+  const visibleItems = items.filter(el => el.style.display !== 'none');
+  lightboxItems = visibleItems.length > 0 ? visibleItems : items;
+  img.src = lightboxItems[lightboxCurrent]?.dataset.src || '';
+  counter.textContent = (lightboxCurrent + 1) + ' / ' + lightboxItems.length;
+  lb.classList.add('open');
+}
+
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+}
+
+function lightboxNav(dir) {
+  lightboxCurrent = (lightboxCurrent + dir + lightboxItems.length) % lightboxItems.length;
+  const img = document.getElementById('lightboxImg');
+  img.style.opacity = '0';
+  setTimeout(() => {
+    img.src = lightboxItems[lightboxCurrent]?.dataset.src || '';
+    img.style.transition = 'opacity .3s';
+    img.style.opacity = '1';
+    document.getElementById('lightboxCounter').textContent = (lightboxCurrent + 1) + ' / ' + lightboxItems.length;
+  }, 150);
+}
+
+document.getElementById('lightbox').addEventListener('click', function(e) {
+  if (e.target === this) closeLightbox();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeLightbox();
+  if (e.key === 'ArrowRight') lightboxNav(1);
+  if (e.key === 'ArrowLeft') lightboxNav(-1);
+});
+
+/* ── GSAP Entrance (if available) ── */
+if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger);
+  gsap.from('.hero-name', { duration: 1.4, opacity: 0, y: -20, ease: 'power3.out', delay: .3 });
+  gsap.from('.hero-divider', { duration: 1.2, scaleY: 0, ease: 'power3.out', delay: .5, transformOrigin: 'top' });
+  gsap.from('.hero-scroll', { duration: 1, opacity: 0, y: 10, ease: 'power2.out', delay: 1.2 });
+}
+</script>
+</body>
+</html>
